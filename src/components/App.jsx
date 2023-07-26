@@ -6,12 +6,6 @@ import { useEffect, useRef, useContext } from 'react';
 import { ImageContext } from 'context/ImageContext';
 
 function App() {
-  // const [images, setImages] = useState([]);
-  // const [currentPage, setCurrentPage] = useState(1);
-  // const [inputSearch, setInputSearch] = useState('');
-  // const [isLoading, setIsLoading] = useState(false);
-  // const [isSearchSubmitted, setIsSearchSubmitted] = useState(false);
-
   const {
     images,
     currentPage,
@@ -41,14 +35,14 @@ function App() {
       fetchImages();
     }
     prevPageRef.current = currentPage;
-  }, [currentPage]);
+  }, [currentPage, fetchImages]);
 
   useEffect(() => {
     return () => {
       setImages([]);
       setIsSearchSubmitted(false);
     };
-  }, []);
+  }, [setImages, setIsSearchSubmitted]);
 
   return (
     <div>
