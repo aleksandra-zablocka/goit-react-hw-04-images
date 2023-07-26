@@ -1,13 +1,12 @@
 import css from './ImageGallery.module.css';
-import { Component } from 'react';
 import ImageGalleryItem from 'components/ImageGalleryItem/ImageGalleryItem';
-import PropTypes from 'prop-types';
+import { useContext } from 'react';
+import { ImageContext } from 'context/ImageContext';
 
-class ImageGallery extends Component {
-  render() {
-    const { images } = this.props;
+const ImageGallery = () => {
+  const { images } = useContext(ImageContext);
 
-    return (
+     return (
       <div className={css.container}>
         {images.length > 0 ? (
           <ul className={css.imageGallery}>
@@ -26,17 +25,5 @@ class ImageGallery extends Component {
       </div>
     );
   }
-}
-
-ImageGallery.propTypes = {
-  images: PropTypes.arrayOf(
-    PropTypes.shape({
-      id: PropTypes.number,
-      webformatURL: PropTypes.string,
-      tags: PropTypes.string,
-      largeImageURL: PropTypes.string,
-    })
-  ),
-};
 
 export default ImageGallery;

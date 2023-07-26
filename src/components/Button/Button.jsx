@@ -1,26 +1,22 @@
 import css from './Button.module.css';
-import { Component } from 'react';
-import PropTypes from 'prop-types';
+import { useContext } from 'react';
+import { ImageContext } from 'context/ImageContext';
 
-class Button extends Component {
-  handleClick = e => {
+const Button = () => {
+  const { loadMore } = useContext(ImageContext);
+
+  const handleClick = e => {
     e.preventDefault();
-    this.props.loadMore();
+    loadMore();
   };
 
-  render() {
-    return (
-      <div className={css.loadMore}>
-        <button className={css.button} onClick={this.handleClick} type="button">
-          Load more
-        </button>
-      </div>
-    );
-  }
-}
-
-Button.propTypes = {
-  loadMore: PropTypes.func,
+  return (
+    <div className={css.loadMore}>
+      <button className={css.button} onClick={handleClick} type="button">
+        Load more
+      </button>
+    </div>
+  );
 };
 
 export default Button;
