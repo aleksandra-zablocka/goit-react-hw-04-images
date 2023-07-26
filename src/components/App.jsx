@@ -2,39 +2,41 @@ import Searchbar from './Searchbar/Searchbar';
 import ImageGallery from './ImageGallery/ImageGallery';
 import Loader from './Loader/Loader';
 import Button from './Button/Button';
-import { Component } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 const API_KEY = '36802043-6369625f376675122720202cd';
 
-export class App extends Component {
-  state = {
-    images: [],
-    currentPage: 1,
-    inputSearch: '',
-    isLoading: false,
-    isSearchSubmitted: false,
-  };
+function App() {
+  const [images, setImages] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [inputSearch, setInputSearch] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [isSearchSubmitted, setIsSearchSubmitted] = useState(false);
 
-  async componentDidMount() {
-    if (this.state.inputSearch !== '') {
-      this.fetchImages();
+  const prevPageRef = useRef(currentPage);
+
+  useEffect(() => {
+    if (inputSearch !== '') {
+      fetchImages();
     }
-  }
+  }, []);
 
-  async componentDidUpdate(prevProps, prevState) {
-    if (prevState.currentPage !== this.state.currentPage) {
-      this.fetchImages();
+  useEffect(() => {
+    if (prevPageRef.current !== currentPage) {
+      fetchImages();
     }
-  }
+    prevPageRef.current = currentPage;
+  }, [currentPage]);
 
-  async componentWillUnmount() {
-    this.setState({ images: [] });
-    this.setState({ isSearchSubmitted: false });
-  }
+  useEffect(() => {
+    return () => {
+      setImages([]);
+      setIsSearchSubmitted(false);
+    };
+  }, []);
 
-  fetchImages = async () => {
-    const { inputSearch, currentPage } = this.state;
-    this.setState({ isLoading: true });
+  const fetchImages = async () => {
+    setIsLoading(true);
     try {
       const response = await fetch(
         `https://pixabay.com/api/?key=${API_KEY}&lang=eng&q=${inputSearch}&image_type=photo&orientation=horizontal&per_page=12&page=${currentPage}`
@@ -46,66 +48,59 @@ export class App extends Component {
 
       const data = await response.json();
 
-      this.setState(prevState => ({
-        images: [...prevState.images, ...data.hits],
-      }));
+      setImages(prevState => [...prevState, ...data.hits]);
 
       if (inputSearch !== '') {
-        this.setState({ isSearchSubmitted: true });
+        setIsSearchSubmitted(true);
       }
     } catch (error) {
       console.log('error', error);
       return error;
     } finally {
-      this.setState({ isLoading: false });
+      setIsLoading(false);
     }
   };
 
-  handleSubmit = e => {
+  const handleSubmit = e => {
     e.preventDefault();
-    this.fetchImages();
-    this.setState({ images: [], currentPage: 1 });
+    fetchImages();
+    setImages([]);
+    setCurrentPage(1);
   };
 
-  handleChange = e => {
-    const { value, name } = e.target;
-    this.setState({ [name]: value });
+  const handleChange = e => {
+    const { value } = e.target;
+    setInputSearch(value);
 
-    if (this.state.isSearchSubmitted) {
-      this.setState({ isSearchSubmitted: false, images: [] });
+    if (isSearchSubmitted) {
+      setIsSearchSubmitted(false);
+      setImages([]);
     }
   };
 
-  loadMore = () => {
-    // this.fetchImages();
-    this.setState(prevState => ({
-      ...prevState,
-      currentPage: prevState.currentPage + 1,
-    }));
+  const loadMore = () => {
+    setCurrentPage(prevState => prevState + 1);
   };
 
-  render() {
-    const { inputSearch, images, isLoading, isSearchSubmitted } = this.state;
-    const isInputSearchEmpty = inputSearch === '';
-    const hasImages = images.length > 0;
-    return (
-      <div>
-        <Searchbar
-          inputSearch={inputSearch}
-          handleSubmit={this.handleSubmit}
-          handleChange={this.handleChange}
-        />
+  const isInputSearchEmpty = inputSearch === '';
+  const hasImages = images.length > 0;
+  return (
+    <div>
+      <Searchbar
+        inputSearch={inputSearch}
+        handleSubmit={handleSubmit}
+        handleChange={handleChange}
+      />
 
-        {isSearchSubmitted && !isInputSearchEmpty && (
-          <>
-            {isLoading && <Loader />}
-            <ImageGallery images={images} />
-            {hasImages && <Button loadMore={this.loadMore} />}
-          </>
-        )}
-      </div>
-    );
-  }
+      {isSearchSubmitted && !isInputSearchEmpty && (
+        <>
+          {isLoading && <Loader />}
+          <ImageGallery images={images} />
+          {hasImages && <Button loadMore={loadMore} />}
+        </>
+      )}
+    </div>
+  );
 }
 
 export default App;
