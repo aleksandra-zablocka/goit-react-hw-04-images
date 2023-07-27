@@ -28,6 +28,7 @@ function App() {
     if (inputSearch !== '') {
       fetchImages();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
